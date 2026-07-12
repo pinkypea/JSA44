@@ -35,6 +35,10 @@ function fetch_movie(url, container_id){
                 <img src="${IMAGE_URL + movie.poster_path}">
                 <p>${movie.title}</p>`
 
+                movie_card.addEventListener("click", () => {
+                    window.location.href = `../info.html?id=${movie.id}`
+                })
+
                 container.appendChild(movie_card);
             }
         })
