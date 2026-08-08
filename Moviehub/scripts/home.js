@@ -59,3 +59,71 @@ fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${TMDB_API_KEY}`)
         .then(res => res.json())
         .then(data => console.log(data))
         .catch(error => console.log(error))
+
+
+function fetchProjectSlugs(query = '') {
+  const url = `https://www.thisispaper.com/intelligence/api/v1/search?q=${encodeURIComponent(query)}&limit=20`;
+
+  return fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer tip_live_1ecchn7ax51e07b2zgscgfe9'
+    }
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Extract just the slug strings into an array
+      const slugs = data.results.map(project => project.slug);
+      console.log('Available Slugs:', slugs);
+      return slugs;
+    })
+    .catch(error => {
+      console.error('Error fetching slugs:', error);
+    });
+}
+
+// Fetch a list of slugs related to architecture
+fetchProjectSlugs('photography');
+
+
+function displayAllProjectsFromSearch(searchQuery) {
+  const searchUrl = `https://www.thisispaper.com/intelligence/api/v1/search?q=${encodeURIComponent(searchQuery)}&limit=5`;
+
+  fetch(searchUrl, {
+    headers: { 'Authorization': 'Bearer tip_live_1ecchn7ax51e07b2zgscgfe9' }
+  })
+    .then(response => {
+      if (!response.ok) throw new Error(`Search failed: ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      console.log(`Found ${data.results.length} projects. Fetching details for each...`);
+
+      // Iterate through every project result from the search
+      data.results.forEach(item => {
+        const projectUrl = `https://www.thisispaper.com/intelligence/api/v1/project/${item.slug}`;
+
+        fetch(projectUrl, {
+          headers: { 'Authorization': 'Bearer tip_live_1ecchn7ax51e07b2zgscgfe9' }
+        })
+          .then(res => {
+            if (!res.ok) throw new Error(`Project ${item.slug} failed: ${res.status}`);
+            return res.json();
+          })
+          .then(projectDetails => {
+            console.log(`--- Full Data for [${item.slug}] ---`);
+            console.log(projectDetails);
+          })
+          .catch(err => console.error(`Error for ${item.slug}:`, err));
+      });
+    })
+    .catch(err => console.error('Search error:', err));
+}
+
+// Executes search and prints full details for every returned slug
+displayAllProjectsFromSearch('concrete');
